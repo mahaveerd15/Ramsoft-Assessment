@@ -1,27 +1,25 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Column from "./Column";
+import { getBoardData, setBoardData } from "./Data";
+import { Button, TextareaAutosize } from "@mui/material";
 
 const Board = () => {
-  const [columns, setColumns] = useState([
-    {
-      id: "c1",
-      title: "TODO",
-      tasks: [
-        {
-          id: "t1",
-          colId: "c1",
-          title: "First task",
-          desc: "aaa",
-          deadline: "aaaa"
-        }
-      ]
-    },
-    {
-      id: "c2",
-      title: "In prog",
-      tasks: []
-    }
-  ]);
+  const [columns, _setColumns] = useState([]);
+
+  const setColumns = (data) => {
+    _setColumns(data);
+    persistBoard(data);
+  };
+
+  useEffect(() => {
+    getBoardData().then((data) => {
+      setColumns(data);
+    });
+  }, []);
+
+  const persistBoard = (data) => {
+    setBoardData(data);
+  };
 
   const updateColumn = (id, update) => {
     const updatedColumns = [...columns];
@@ -52,30 +50,46 @@ const Board = () => {
     setColumns(updatedColumns);
   };
 
+  const moveTask = (task, fromColId, toColId) => {
+    task = { ...task };
+    task.colId = toColId;
+    const udpatedCols = [...columns];
+    const fromColIndex = udpatedCols.findIndex((x) => x.id === fromColId);
+    const toColIndex = udpatedCols.findIndex((x) => x.id === toColId);
+    udpatedCols[fromColIndex].tasks = udpatedCols[fromColIndex].tasks.filter(
+      (x) => x.id !== task.id
+    );
+    udpatedCols[toColIndex].tasks = [...udpatedCols[toColIndex].tasks, task];
+    setColumns(udpatedCols);
+  };
+
   return (
-    <div>
-      <button onClick={handleAddColumn}>Add Column</button>
-      <div style={styles.row}>
+    <div className="board-div">
+      <div className="add-column-btn">
+        <Button onClick={handleAddColumn} variant="contained" color="primary">
+        Add Column
+      </Button>
+      </div>
+      <div className="column-container">
         {columns.map((col) => {
           return (
-            <Column key={col.id} column={col} updateColumns={setColumns} />
+            <Column
+              key={col.id}
+              column={col}
+              update={updateColumn}
+              removeTask={removeTask}
+              moveTask={moveTask}
+            />
           );
         })}
       </div>
-      <textarea
+      {/* <textarea
         style={{ width: "100%", height: 400 }}
         value={JSON.stringify(columns, null, 2)}
-      />
+      /> */}
     </div>
   );
 };
 
-const styles = {
-  row: {
-    display: "flex",
-    padding: 20,
-    backgroundColor: "lightgrey"
-  }
-};
 
 export default Board;

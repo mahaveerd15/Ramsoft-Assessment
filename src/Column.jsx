@@ -1,4 +1,7 @@
 import Task from "./Task";
+import { Card, CardContent, Typography, IconButton } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+
 
 const Column = (props) => {
   const onClickAdd = () => {
@@ -20,55 +23,78 @@ const Column = (props) => {
   };
 
   const handleDrop = (e) => {
-    console.log("hello");
     e.preventDefault();
     const data = e.dataTransfer.getData("taskJson");
     const task = JSON.parse(data);
-    const removeColId = task.colId;
-    task.colId = props.column.id;
-    props.update(props.column.id, {
-      ...props.column,
-      tasks: [...props.column.tasks, task]
-    });
-    props.removeTask(removeColId, task.id);
+    const fromColumnId = task.colId;
+    const toColumnId = props.column.id;
+
+    props.moveTask(task, fromColumnId, toColumnId);
   };
 
   const handleDragOver = (event) => {
     event.preventDefault();
   };
 
+  const handleUpdateTask = (updatedTask) => {
+    const tasks = [...props.column.tasks];
+    const index = tasks.findIndex((x) => x.id === updatedTask.id);
+    tasks[index] = updatedTask;
+    props.update(props.column.id, {
+      ...props.column,
+      tasks
+    });
+  };
+
+  const handleRemoveTask = (task) => {
+    const tasks = props.column.tasks.filter((x) => x.id !== task.id);
+    props.update(props.column.id, {
+      ...props.column,
+      tasks
+    });
+  };
+
   return (
-    <div style={styles.container}>
-      <div style={styles.row}>
-        <div>{props.column.title}</div>
-        <button onClick={onClickAdd}>Add</button>
-      </div>
-      <div
-        onDrop={handleDrop}
-        onDragOver={handleDragOver}
-        style={{ border: "1px solid lightgrey", padding: 10 }}
-      >
-        {props.column.tasks.map((task) => {
-          return <Task key={task.id} task={task} />;
-        })}
-      </div>
-    </div>
+    <Card style={{width: "400px"}}>
+      <CardContent>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+          <Typography variant="h6">{props.column.title}</Typography>
+         <IconButton color="primary" onClick={onClickAdd}>
+            <AddIcon />
+          </IconButton>
+        </div>
+        <div
+          onDrop={handleDrop}
+          onDragOver={handleDragOver}
+          style={{ border: "1px solid lightgrey", padding: 10 }}
+        >
+          {props.column.tasks.map((task) => (
+            <Task
+              key={task.id}
+              task={task}
+              updateTask={handleUpdateTask}
+              removeTask={handleRemoveTask}
+            />
+          ))}
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 
-const styles = {
-  container: {
-    display: "flex",
-    flexDirection: "column",
-    padding: 10,
-    border: "1px solid grey",
-    margin: 10,
-    background: "white"
-  },
-  row: {
-    display: "flex",
-    justifyContent: "space-between"
-  }
-};
+// const styles = {
+//   container: {
+//     display: "flex",
+//     flexDirection: "column",
+//     padding: 10,
+//     border: "1px solid grey",
+//     margin: 10,
+//     background: "white"
+//   },
+//   row: {
+//     display: "flex",
+//     justifyContent: "space-between"
+//   }
+// };
 
 export default Column;
