@@ -82,19 +82,4 @@ const Column = (props) => {
   );
 };
 
-// const styles = {
-//   container: {
-//     display: "flex",
-//     flexDirection: "column",
-//     padding: 10,
-//     border: "1px solid grey",
-//     margin: 10,
-//     background: "white"
-//   },
-//   row: {
-//     display: "flex",
-//     justifyContent: "space-between"
-//   }
-// };
-
 export default Column;
